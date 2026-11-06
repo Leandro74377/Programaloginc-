@@ -1,0 +1,139 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Clientes";
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">REGISTRO DE CLIENTES</p>
+        <h1>Clientes</h1>
+        <p class="page-description">Administra la información de tus clientes.</p>
+    </div>
+    <form method="post" asp-page="/Logout">
+        <button class="button button-quiet" type="submit">Cerrar sesión <span aria-hidden="true">↗</span></button>
+    </form>
+</section>
+
+@if (TempData["Mensaje"] is string mensaje)
+{
+    <div class="notice" role="status">@mensaje</div>
+}
+
+<div class="workspace-grid">
+    <section class="panel form-panel" aria-labelledby="form-title">
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">@(Model.ClienteForm.IdCliente == 0 ? "NUEVO REGISTRO" : $"EDITANDO · #{Model.ClienteForm.IdCliente}")</p>
+                <h2 id="form-title">@(Model.ClienteForm.IdCliente == 0 ? "Agregar cliente" : "Editar cliente")</h2>
+            </div>
+        </div>
+
+        <form method="post" asp-page-handler="Save" class="client-form">
+            <input asp-for="ClienteForm.IdCliente" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+            <div class="field">
+                <label for="client-id">IdCliente</label>
+                <input id="client-id" class="form-control" value="@(Model.ClienteForm.IdCliente == 0 ? "Automático" : Model.ClienteForm.IdCliente.ToString())" readonly />
+                <span class="field-hint">Se asigna al guardar.</span>
+            </div>
+            <div class="field">
+                <label asp-for="ClienteForm.NombreCliente"></label>
+                <input asp-for="ClienteForm.NombreCliente" class="form-control" autocomplete="name" placeholder="Nombre y apellido" />
+                <span asp-validation-for="ClienteForm.NombreCliente" class="validation-message"></span>
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <label asp-for="ClienteForm.CedulaCliente"></label>
+                    <input asp-for="ClienteForm.CedulaCliente" class="form-control" placeholder="Número de identificación" />
+                    <span asp-validation-for="ClienteForm.CedulaCliente" class="validation-message"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="ClienteForm.Edad"></label>
+                    <input asp-for="ClienteForm.Edad" class="form-control" min="0" max="120" />
+                    <span asp-validation-for="ClienteForm.Edad" class="validation-message"></span>
+                </div>
+            </div>
+            <div class="field">
+                <label asp-for="ClienteForm.FechaRegistro"></label>
+                <input asp-for="ClienteForm.FechaRegistro" asp-format="{0:yyyy-MM-dd}" class="form-control" />
+                <span asp-validation-for="ClienteForm.FechaRegistro" class="validation-message"></span>
+            </div>
+            <div class="field">
+                <label asp-for="ClienteForm.Observaciones"></label>
+                <textarea asp-for="ClienteForm.Observaciones" class="form-control" rows="3" placeholder="Información adicional (opcional)"></textarea>
+                <span asp-validation-for="ClienteForm.Observaciones" class="validation-message"></span>
+            </div>
+            <div class="form-actions">
+                <button class="button button-primary" type="submit">@(Model.ClienteForm.IdCliente == 0 ? "Guardar cliente" : "Guardar cambios")</button>
+                @if (Model.ClienteForm.IdCliente != 0)
+                {
+                    <a class="button button-quiet" asp-page="/Index">Cancelar</a>
+                }
+            </div>
+        </form>
+    </section>
+
+    <section class="panel list-panel" aria-labelledby="list-title">
+        <div class="panel-heading list-heading">
+            <div>
+                <p class="eyebrow">DIRECTORIO</p>
+                <h2 id="list-title">Clientes registrados <span class="count">@Model.Clientes.Count</span></h2>
+            </div>
+            <form method="get" class="search-form" role="search">
+                <label class="visually-hidden" for="search-clients">Buscar clientes</label>
+                <input id="search-clients" name="Buscar" value="@Model.Buscar" class="form-control" placeholder="Nombre o cédula" />
+                <button class="button button-search" type="submit" aria-label="Buscar">Buscar</button>
+            </form>
+        </div>
+
+        @if (Model.Clientes.Count == 0)
+        {
+            <div class="empty-state">
+                <span class="empty-mark" aria-hidden="true">＋</span>
+                <p>@(string.IsNullOrWhiteSpace(Model.Buscar) ? "Todavía no hay clientes registrados." : "No se encontraron clientes con esa búsqueda.")</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-scroll">
+                <table class="client-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Cliente</th>
+                            <th scope="col">Cédula</th>
+                            <th scope="col">Edad</th>
+                            <th scope="col">Registro</th>
+                            <th scope="col"><span class="visually-hidden">Acciones</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cliente in Model.Clientes)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="client-name">@cliente.NombreCliente</span>
+                                    <span class="client-id">ID @cliente.IdCliente</span>
+                                </td>
+                                <td>@cliente.CedulaCliente</td>
+                                <td>@cliente.Edad</td>
+                                <td>@cliente.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                                <td class="row-actions">
+                                    <a class="icon-action" asp-page-handler="Edit" asp-route-id="@cliente.IdCliente" aria-label="Editar @cliente.NombreCliente" title="Editar">↗</a>
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@cliente.IdCliente" onsubmit="return confirm('¿Eliminar este cliente?');">
+                                        <button class="icon-action danger-action" type="submit" aria-label="Eliminar @cliente.NombreCliente" title="Eliminar">×</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,38 @@
+@page
+@model Programaloginc.Pages.LoginModel
+@{
+    ViewData["Title"] = "Iniciar sesión";
+}
+
+<section class="login-shell">
+    <div class="login-brand" aria-hidden="true">
+        <span class="brand-symbol">C</span>
+        <span>CUADERNO<br />DE CLIENTES</span>
+    </div>
+    <p class="eyebrow">ACCESO AL SISTEMA</p>
+    <h1>Bienvenido.</h1>
+    <p class="page-description">Inicia sesión para continuar al registro de clientes.</p>
+    <form method="post" class="client-form login-form">
+        <input asp-for="ReturnUrl" type="hidden" />
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+        <div class="field">
+            <label asp-for="Input.Email"></label>
+            <input asp-for="Input.Email" class="form-control" autocomplete="username" autofocus />
+            <span asp-validation-for="Input.Email" class="validation-message"></span>
+        </div>
+        <div class="field">
+            <label asp-for="Input.Password"></label>
+            <input asp-for="Input.Password" class="form-control" autocomplete="current-password" />
+            <span asp-validation-for="Input.Password" class="validation-message"></span>
+        </div>
+        <label class="remember-option">
+            <input asp-for="Input.RememberMe" />
+            <span>Recordarme en este equipo</span>
+        </label>
+        <button class="button button-primary login-submit" type="submit">Iniciar sesión <span aria-hidden="true">→</span></button>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
